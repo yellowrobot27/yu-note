@@ -4,9 +4,9 @@ import { Stack } from '../../src/components/primitives/Stack';
 import { Text } from '../../src/components/primitives/Text';
 import { EmptyState } from '../../src/components/primitives/EmptyState';
 import { StyledButton } from '../../src/components/StyledButton';
-import {Badge} from "@/components/primitives";
-import {colors} from "@/theme";
-import {StyleSheet} from "react-native";
+import { Badge } from "@/components/primitives";
+import { colors } from "@/theme";
+import { StyleSheet } from "react-native";
 
 export default function HomeScreen() {
   const { user, logout } = useAuthStore();
