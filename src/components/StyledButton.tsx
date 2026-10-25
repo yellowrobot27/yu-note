@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet } from 'react-native';
 import { Spinner } from './primitives/Spinner';
 import { Text } from './primitives/Text';
+import { colors, spacing } from '../theme';
 
 interface StyledButtonProps {
   label: string;
@@ -21,17 +22,58 @@ export function StyledButton({
     <Pressable
       onPress={onPress}
       disabled={isLoading}
-      style={[styles.base, styles[variant], isLoading && styles.disabled]}
+      accessibilityRole="button"
+      style={({ pressed }) => [
+        styles.base,
+        styles[variant],
+        pressed && !isLoading && styles.pressed,
+        isLoading && styles.disabled,
+      ]}
       testID={testID}
     >
-      {isLoading ? <Spinner size="small" /> : <Text weight="medium">{label}</Text>}
+      {isLoading ? (
+        <Spinner size="small" />
+      ) : (
+        <Text
+          weight="medium"
+          color={variant === 'primary'
+            ? styles.primaryText.color
+            : styles.secondaryText.color}
+        >
+          {label}
+        </Text>
+      )}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  base: { alignItems: 'center', justifyContent: 'center' },
-  primary: {},
-  secondary: {},
-  disabled: {},
+  base: {
+    minHeight: 52,
+    width: '100%',
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
+  },
+  primary: {
+    backgroundColor: colors.primary,
+  },
+  secondary: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  primaryText: {
+    color: colors.white,
+  },
+  secondaryText: {
+    color: colors.primary,
+  },
+  pressed: {
+    opacity: 0.85,
+  },
+  disabled: {
+    opacity: 0.65,
+  },
 });

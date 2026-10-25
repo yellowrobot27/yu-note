@@ -4,6 +4,7 @@ export const colors = {
   primary: '#083C1D',    // Forest green
   accent: '#083C1D',     // Forest green for links and actions
   accentMuted: 'rgba(8, 60, 29, 0.12)',
+  emphasis: '#C66A4B',
 
   // Surfaces
   surface: '#FFFFFF',

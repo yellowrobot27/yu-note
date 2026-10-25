@@ -1,31 +1,32 @@
-
 import { useState } from 'react';
 import {
   View,
   Text,
+  TextInput,
+  Pressable,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
+  ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useAuthStore } from '../src/state/useAuthStore';
-import { InputField } from '../src/components/primitives/InputField';
-import { StyledButton } from '../src/components/StyledButton';
-import { Stack } from '../src/components/primitives/Stack';
 import { colors, spacing } from '../src/theme';
+import { StyledButton } from '@/components/StyledButton';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+
   const { login, isLoading } = useAuthStore();
 
   const handleLogin = async () => {
     setError('');
 
     try {
-      await login(email, password);
+      await login(email.trim(), password);
       router.replace('/');
     } catch {
       setError('Invalid email or password.');
@@ -37,10 +38,14 @@ export default function LoginScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={styles.screen}>
-        <View style={styles.content}>
-          {/* Logo and branding */}
-          <Stack gap="sm" align="center">
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.screen}>
+          {/* Brand */}
+          <View style={styles.brand}>
             <View style={styles.logo}>
               <Text style={styles.logoCharacter}>语</Text>
             </View>
@@ -50,59 +55,75 @@ export default function LoginScreen() {
             <Text style={styles.tagline}>
               Your thoughts, your next language.
             </Text>
-          </Stack>
+          </View>
 
-          {/* Welcome copy */}
+          {/* Welcome */}
           <View style={styles.welcome}>
-            <Text style={styles.title}>Welcome back</Text>
-            <Text style={styles.subtitle}>
+            <Text style={styles.heading}>Welcome back</Text>
+            <Text style={styles.description}>
               Pick up where your learning journey left off.
             </Text>
           </View>
 
-          {/* Login form */}
-          <Stack gap="lg">
-            <InputField
-              label="Email address"
-              value={email}
-              onChangeText={setEmail}
-              placeholder="you@example.com"
-              testID="email-input"
-            />
+          {/* Form */}
+          <View style={styles.form}>
+            <View style={styles.field}>
+              <Text style={styles.label}>Email address</Text>
+              <TextInput
+                style={styles.input}
+                value={email}
+                onChangeText={setEmail}
+                placeholder="you@example.com"
+                placeholderTextColor={colors.textPlaceholder}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="email"
+                accessibilityLabel="Email address"
+                testID="email-input"
+              />
+            </View>
 
-            <InputField
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Enter your password"
-              secureTextEntry
-              testID="password-input"
-              error={error !== '' ? error : undefined}
-            />
+            <View style={styles.field}>
+              <Text style={styles.label}>Password</Text>
+              <TextInput
+                style={styles.input}
+                value={password}
+                onChangeText={setPassword}
+                placeholder="Enter your password"
+                placeholderTextColor={colors.textPlaceholder}
+                secureTextEntry
+                autoComplete="current-password"
+                accessibilityLabel="Password"
+                testID="password-input"
+                onSubmitEditing={handleLogin}
+                returnKeyType="go"
+              />
+            </View>
 
             <Pressable
               style={styles.forgotPassword}
               onPress={() => router.push('/forgot-password')}
               accessibilityRole="link"
             >
-              <Text style={styles.accentText}>
-                Forgot password?
-              </Text>
+              <Text style={styles.forgotText}>Forgot password?</Text>
             </Pressable>
 
-            <StyledButton
-              label="Log in"
-              onPress={handleLogin}
-              isLoading={isLoading}
-              testID="login-button"
-            />
-          </Stack>
+            {error !== '' && (
+              <Text style={styles.error}>{error}</Text>
+            )}
 
-          {/* Registration redirect */}
+			<StyledButton
+				label="Log in"
+				onPress={handleLogin}
+				isLoading={isLoading}
+				testID="login-button"
+			/>
+          </View>
+
+          {/* Register redirect */}
           <View style={styles.redirect}>
-            <Text style={styles.redirectText}>
-              New to YuNote?
-            </Text>
+            <Text style={styles.redirectText}>New to YuNote?</Text>
 
             <Pressable
               onPress={() => router.push('/register')}
@@ -115,11 +136,10 @@ export default function LoginScreen() {
           </View>
         </View>
 
-        {/* Footer */}
         <Text style={styles.footer}>
           Write. Discover. Remember.
         </Text>
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -129,18 +149,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  screen: {
-    flex: 1,
-    width: '100%',
-    maxWidth: 440,
-    alignSelf: 'center',
+  scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.md,
-    justifyContent: 'space-between',
+    paddingTop: 24,
+    paddingBottom: 16,
   },
-  content: {
+  screen: {
     width: '100%',
+    maxWidth: 400,
+    alignSelf: 'center',
+    flexGrow: 1,
+  },
+
+  // Branding
+  brand: {
+    alignItems: 'center',
   },
   logo: {
     width: 88,
@@ -158,6 +182,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   wordmark: {
+    marginTop: 16,
     fontSize: 29,
     lineHeight: 35,
     fontWeight: '700',
@@ -165,41 +190,101 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   tagline: {
+    marginTop: 2,
     fontSize: 12,
+    lineHeight: 17,
     color: colors.textSecondary,
     textAlign: 'center',
   },
+
+  // Welcome copy
   welcome: {
-    marginTop: spacing.xxl,
-    marginBottom: spacing.xl,
+    marginTop: 48,
+    marginBottom: 32,
   },
-  title: {
+  heading: {
     fontSize: 25,
     lineHeight: 32,
     fontWeight: '700',
     color: colors.primary,
   },
-  subtitle: {
-    marginTop: spacing.xs,
+  description: {
+    marginTop: 4,
     fontSize: 12,
     lineHeight: 18,
     color: colors.textSecondary,
   },
+
+  // Inputs
+  form: {
+    width: '100%',
+  },
+  field: {
+    marginBottom: 20,
+  },
+  label: {
+    marginBottom: 8,
+    marginLeft: 2,
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '500',
+    color: colors.text,
+  },
+  input: {
+    height: 50,
+    width: '100%',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 12,
+    backgroundColor: colors.surface,
+    paddingHorizontal: 14,
+    paddingVertical: 0,
+    fontSize: 13,
+    color: colors.text,
+  },
   forgotPassword: {
     alignSelf: 'flex-end',
-    marginTop: -spacing.sm,
-    marginBottom: -spacing.sm,
-    paddingVertical: spacing.xs,
+    marginTop: -4,
+    marginBottom: 28,
+    paddingVertical: 2,
   },
-  accentText: {
-    fontSize: 12,
+  forgotText: {
+    fontSize: 11,
     fontWeight: '500',
-    color: colors.accent,
+    color: colors.emphasis,
   },
+  error: {
+    marginBottom: 12,
+    fontSize: 12,
+    color: '#B42318',
+  },
+
+  // Primary button
+  loginButton: {
+    height: 52,
+    width: '100%',
+    borderRadius: 14,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonPressed: {
+    opacity: 0.85,
+  },
+  buttonDisabled: {
+    opacity: 0.65,
+  },
+  loginButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.white,
+  },
+
+  // Registration
   redirect: {
     alignItems: 'center',
-    marginTop: spacing.xl,
-    gap: spacing.sm,
+    marginTop: 40,
+    gap: 8,
   },
   redirectText: {
     fontSize: 12,
@@ -208,10 +293,14 @@ const styles = StyleSheet.create({
   redirectAction: {
     fontSize: 13,
     fontWeight: '700',
-    color: colors.accent,
+    color: colors.emphasis,
   },
+
+  // Footer
   footer: {
+    marginTop: 32,
     fontSize: 10,
+    lineHeight: 14,
     color: colors.textSecondary,
     textAlign: 'center',
   },
