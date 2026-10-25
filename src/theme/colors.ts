@@ -18,4 +18,7 @@ export const colors = {
   text: '#1C1C1E',
   textSecondary: '#8A8480',
   textPlaceholder: '#B5AFA8',
+
+  // Error
+  error: '#B42318'
 } as const;

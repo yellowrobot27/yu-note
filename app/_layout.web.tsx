@@ -3,7 +3,8 @@ import { Slot } from 'expo-router';
 import Head from 'expo-router/head';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useAuthStore } from '../src/state/useAuthStore';
+import { useAuthStore } from '@/state/useAuthStore';
+import { colors } from '@/theme'
 
 export default function RootLayout() {
 	const initializeSession = useAuthStore((state) => state.initializeSession);
@@ -22,7 +23,7 @@ export default function RootLayout() {
 	<>
 		<Head>
 			<link rel="manifest" href="/manifest.json" />
-			<meta name="theme-color" content="#244D3B" />
+			<meta name="theme-color" content={colors.accent} />
 			<meta name="mobile-web-app-capable" content="yes" />
 			<meta name="apple-mobile-web-app-capable" content="yes" />
 			<meta

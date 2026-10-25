@@ -33,13 +33,31 @@ export function Stack({
 }
 
 const styles = StyleSheet.create({
-  base: { flexDirection: 'column' },
-  gap_none: {},
-  gap_sm: {},
-  gap_md: {},
-  gap_lg: {},
-  padding_none: {},
-  padding_sm: {},
-  padding_md: {},
-  padding_lg: {},
+  base: {
+    flexDirection: 'column',
+  },
+  gap_none: {
+    gap: 0,
+  },
+  gap_sm: {
+    gap: 8,
+  },
+  gap_md: {
+    gap: 12,
+  },
+  gap_lg: {
+    gap: 20,
+  },
+  padding_none: {
+    padding: 0,
+  },
+  padding_sm: {
+    padding: 8,
+  },
+  padding_md: {
+    padding: 16,
+  },
+  padding_lg: {
+    padding: 24,
+  },
 });
