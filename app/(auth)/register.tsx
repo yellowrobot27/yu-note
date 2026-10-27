@@ -1,43 +1,54 @@
 import { useState } from 'react';
 import {
+  KeyboardAvoidingView,
   Platform,
   Pressable,
   StyleSheet,
-  KeyboardAvoidingView
 } from 'react-native';
 import {
-  Text,
-  Stack,
+  Container,
+  Divider,
   InputField,
   Screen,
-  Container,
-  Divider
-} from '@/components/primitives'
+  Stack,
+  Text,
+} from '@/components/primitives';
 import { StyledButton } from '@/components/StyledButton';
 import { AppLogo } from '@/components/AppLogo';
 import { router } from 'expo-router';
 import { useAuthStore } from '@/state/useAuthStore';
 import { colors } from '@/theme';
 
-export default function LoginScreen() {
+export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
 
-  const { login, isLoading } = useAuthStore();
+  const { register, isLoading } = useAuthStore();
 
-  const handleLogin = async () => {
-    setError('');
+  const handleRegister = async () => {
+    setPasswordError('');
+    setConfirmPasswordError('');
+
+    if (password !== confirmPassword) {
+      setConfirmPasswordError('Passwords do not match.');
+      return;
+    }
 
     try {
-      await login(email.trim(), password);
+      await register(email.trim(), password);
       router.replace('/');
-    } catch {
-      setError('Invalid email or password.');
+    } catch (error) {
+      setPasswordError(
+        error instanceof Error
+          ? error.message
+          : 'Could not create your account. Please check your details and try again.'
+      );
     }
   };
 
-  
   return (
     <KeyboardAvoidingView
       style={styles.keyboard}
@@ -49,30 +60,25 @@ export default function LoginScreen() {
             {/* Brand header */}
             <Stack align="center" gap="sm">
               <AppLogo size={64} />
-
-              <Text size="xl" weight="bold" color={colors.text}>
-                YuNote
-              </Text>
-
+              <Text size="xl" weight="bold" color={colors.text}>YuNote</Text>
               <Text color={colors.textSecondary} align="center">
                 Your thoughts, your next language.
               </Text>
             </Stack>
 
-            <Divider spacing='lg' />
+            <Divider spacing="lg" />
 
-            {/* Login heading */}
+            {/* Registration heading */}
             <Stack gap="sm">
               <Text size="xl" weight="bold" color={colors.text}>
-                Welcome back
+                Create your account
               </Text>
-
               <Text color={colors.textSecondary}>
-                Pick up where your learning journey left off.
+                Start turning your notes into Mandarin learning.
               </Text>
             </Stack>
 
-            {/* Login form */}
+            {/* Registration form */}
             <Stack gap="md">
               <InputField
                 label="Email"
@@ -81,48 +87,40 @@ export default function LoginScreen() {
                 placeholder="you@example.com"
                 testID="email-input"
               />
-
               <InputField
                 label="Password"
                 value={password}
                 onChangeText={setPassword}
                 placeholder="Enter your password"
                 secureTextEntry
-                error={error || undefined}
+                error={passwordError || undefined}
                 testID="password-input"
               />
-
-              <Pressable
-                onPress={() => router.push('/forgot-password')}
-                accessibilityRole="link"
-              >
-                <Text
-                  color={colors.emphasis}
-                  weight="medium"
-                  align="right"
-                >
-                  Forgot password?
-                </Text>
-              </Pressable>
-
+              <InputField
+                label="Confirm password"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                placeholder="Enter password again"
+                secureTextEntry
+                error={confirmPasswordError || undefined}
+                testID="confirm-password-input"
+              />
               <StyledButton
-                label="Log in"
-                onPress={handleLogin}
+                label="Create account"
+                onPress={handleRegister}
                 isLoading={isLoading}
-                testID="login-button"
+                testID="register-button"
               />
             </Stack>
 
-            {/* Registration link */}
+            {/* Login link */}
             <Pressable
-              onPress={() => router.push('/register')}
+              onPress={() => router.push('/login')}
               accessibilityRole="link"
             >
               <Text color={colors.textSecondary} align="center">
-                New to YuNote?{' '}
-                <Text color={colors.emphasis} weight="bold">
-                  Create an account
-                </Text>
+                Already have an account?{' '}
+                <Text color={colors.emphasis} weight="bold">Log in</Text>
               </Text>
             </Pressable>
 
@@ -138,12 +136,8 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
   keyboard: {
     flex: 1,
     backgroundColor: colors.background,
-  }
+  },
 });

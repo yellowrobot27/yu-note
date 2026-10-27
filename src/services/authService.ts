@@ -1,9 +1,16 @@
-import { supabase } from '../lib/supabase';
-import type { User } from '../types';
+import { supabase } from '@/lib/supabase';
+import type { User } from '@/types';
 
 export async function login(email: string, password: string): Promise<User> {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw new Error(error.message);
+  return { id: data.user.id, email: data.user.email! };
+}
+
+export async function register(email: string, password: string): Promise<User> {
+  const { data, error } = await supabase.auth.signUp({ email, password });
+  if (error) throw new Error(error.message);
+  if (!data.user) throw new Error('Registration did not return a user.');
   return { id: data.user.id, email: data.user.email! };
 }
 

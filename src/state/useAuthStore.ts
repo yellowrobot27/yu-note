@@ -4,6 +4,7 @@ import type { User } from '../types';
 import {
   login as loginService,
   logout as logoutService,
+  register as registerService,
 } from '../services/authService';
 
 interface AuthState {
@@ -11,6 +12,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   initializeSession: () => () => void;
 }
@@ -25,6 +27,23 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     try {
       const user = await loginService(email, password);
+
+      set({
+        user,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
+    }
+  },
+
+  register: async (email, password) => {
+    set({ isLoading: true });
+
+    try {
+      const user = await registerService(email, password);
 
       set({
         user,
