@@ -8,7 +8,7 @@ export default function RootLayout() {
   const initializeSession = useAuthStore((state) => state.initializeSession);
 
   useEffect(() => {
-    initializeSession();
+    return initializeSession();
   }, [initializeSession]);
 
   return (

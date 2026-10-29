@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   Platform,
   Pressable,
   StyleSheet,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  TextInput,
 } from 'react-native';
 import {
   Text,
@@ -24,6 +25,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const passwordInput = useRef<TextInput>(null);
 
   const { login, isLoading } = useAuthStore();
 
@@ -80,6 +82,8 @@ export default function LoginScreen() {
                 value={email}
                 onChangeText={setEmail}
                 placeholder="you@example.com"
+                returnKeyType="next"
+                onSubmitEditing={() => passwordInput.current?.focus()}
                 testID="email-input"
               />
 
@@ -89,6 +93,9 @@ export default function LoginScreen() {
                 onChangeText={setPassword}
                 placeholder="Enter your password"
                 secureTextEntry
+                inputRef={passwordInput}
+                returnKeyType="done"
+                onSubmitEditing={handleLogin}
                 error={error || undefined}
                 testID="password-input"
               />

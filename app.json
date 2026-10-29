@@ -13,8 +13,9 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#F7F5EE"
-      }
+        "backgroundColor": "#083C1D"
+      },
+      "package": "com.anonymous.yunote"
     },
     "web": {
       "bundler": "metro",
@@ -24,7 +25,9 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-asset",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true

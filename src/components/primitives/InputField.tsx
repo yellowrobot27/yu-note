@@ -1,6 +1,7 @@
 import { TextInput, View, StyleSheet } from 'react-native';
+import type { Ref } from 'react';
 import { Text } from './Text';
-import { colors, spacing } from '../../theme';
+import { colors, spacing } from '@/theme';
 
 interface InputFieldProps {
   label: string;
@@ -10,6 +11,9 @@ interface InputFieldProps {
   secureTextEntry?: boolean;
   error?: string;
   testID?: string;
+  inputRef?: Ref<TextInput>;
+  returnKeyType?: 'done' | 'go' | 'next' | 'search' | 'send';
+  onSubmitEditing?: () => void;
 }
 
 export function InputField({
@@ -20,6 +24,9 @@ export function InputField({
   secureTextEntry = false,
   error,
   testID,
+  inputRef,
+  returnKeyType,
+  onSubmitEditing,
 }: InputFieldProps) {
   return (
     <View style={styles.container}>
@@ -33,6 +40,9 @@ export function InputField({
         placeholder={placeholder}
         placeholderTextColor={colors.textPlaceholder}
         secureTextEntry={secureTextEntry}
+        ref={inputRef}
+        returnKeyType={returnKeyType}
+        onSubmitEditing={onSubmitEditing}
         autoCapitalize="none"
         autoCorrect={false}
         style={[

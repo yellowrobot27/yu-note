@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
   StyleSheet,
+  TextInput,
 } from 'react-native';
 import {
   Container,
@@ -25,12 +26,16 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
+  const [confirmationMessage, setConfirmationMessage] = useState('');
+  const passwordInput = useRef<TextInput>(null);
+  const confirmPasswordInput = useRef<TextInput>(null);
 
   const { register, isLoading } = useAuthStore();
 
   const handleRegister = async () => {
     setPasswordError('');
     setConfirmPasswordError('');
+    setConfirmationMessage('');
 
     if (password !== confirmPassword) {
       setConfirmPasswordError('Passwords do not match.');
@@ -38,8 +43,14 @@ export default function RegisterScreen() {
     }
 
     try {
-      await register(email.trim(), password);
-      router.replace('/');
+      const authenticated = await register(email.trim(), password);
+      if (authenticated) {
+        router.replace('/');
+      } else {
+        setConfirmationMessage(
+          'Check your email for a confirmation link. You can log in after confirming your address.'
+        );
+      }
     } catch (error) {
       setPasswordError(
         error instanceof Error
@@ -85,6 +96,8 @@ export default function RegisterScreen() {
                 value={email}
                 onChangeText={setEmail}
                 placeholder="you@example.com"
+                returnKeyType="next"
+                onSubmitEditing={() => passwordInput.current?.focus()}
                 testID="email-input"
               />
               <InputField
@@ -93,6 +106,9 @@ export default function RegisterScreen() {
                 onChangeText={setPassword}
                 placeholder="Enter your password"
                 secureTextEntry
+                inputRef={passwordInput}
+                returnKeyType="next"
+                onSubmitEditing={() => confirmPasswordInput.current?.focus()}
                 error={passwordError || undefined}
                 testID="password-input"
               />
@@ -102,6 +118,9 @@ export default function RegisterScreen() {
                 onChangeText={setConfirmPassword}
                 placeholder="Enter password again"
                 secureTextEntry
+                inputRef={confirmPasswordInput}
+                returnKeyType="done"
+                onSubmitEditing={handleRegister}
                 error={confirmPasswordError || undefined}
                 testID="confirm-password-input"
               />
@@ -111,6 +130,11 @@ export default function RegisterScreen() {
                 isLoading={isLoading}
                 testID="register-button"
               />
+              {confirmationMessage ? (
+                <Text color={colors.textSecondary} align="center">
+                  {confirmationMessage}
+                </Text>
+              ) : null}
             </Stack>
 
             {/* Login link */}

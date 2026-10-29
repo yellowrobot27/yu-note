@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
-  Linking,
   Platform,
   Pressable,
   StyleSheet,
+  TextInput,
 } from 'react-native';
 import {
   Container,
@@ -17,49 +17,31 @@ import {
 import { StyledButton } from '@/components/StyledButton';
 import { AppLogo } from '@/components/AppLogo';
 import { router } from 'expo-router';
-import { supabase } from '@/lib/supabase';
+import { useAuthStore } from '@/state/useAuthStore';
 import { colors } from '@/theme';
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [isRecoverySession, setIsRecoverySession] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const passwordInput = useRef<TextInput>(null);
+  const confirmPasswordInput = useRef<TextInput>(null);
 
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        setIsRecoverySession(true);
-        setMessage('');
-        setError('');
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const {
+    isPasswordRecovery,
+    isLoading,
+    requestPasswordReset,
+    updatePassword,
+  } = useAuthStore();
 
   const handleSendResetLink = async () => {
     setMessage('');
     setError('');
-    setIsLoading(true);
 
     try {
-      const redirectTo =
-        Platform.OS === 'web'
-          ? `${window.location.origin}/forgot-password`
-          : Linking.createURL('/forgot-password');
-
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-        email.trim(),
-        { redirectTo },
-      );
-
-      if (resetError) throw resetError;
+      await requestPasswordReset(email.trim());
       setMessage('If an account exists for this email, a password reset link has been sent.');
     } catch (caughtError) {
       setError(
@@ -67,8 +49,6 @@ export default function ForgotPasswordScreen() {
           ? caughtError.message
           : 'Could not send a password reset link. Please try again.',
       );
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -81,10 +61,8 @@ export default function ForgotPasswordScreen() {
       return;
     }
 
-    setIsLoading(true);
     try {
-      const { error: updateError } = await supabase.auth.updateUser({ password });
-      if (updateError) throw updateError;
+      await updatePassword(password);
       router.replace('/');
     } catch (caughtError) {
       setError(
@@ -92,8 +70,6 @@ export default function ForgotPasswordScreen() {
           ? caughtError.message
           : 'Could not update your password. Please try again.',
       );
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -119,10 +95,10 @@ export default function ForgotPasswordScreen() {
             {/* Recovery heading */}
             <Stack gap="sm">
               <Text size="xl" weight="bold" color={colors.text}>
-                {isRecoverySession ? 'Choose a new password' : 'Reset your password'}
+                {isPasswordRecovery ? 'Choose a new password' : 'Reset your password'}
               </Text>
               <Text color={colors.textSecondary}>
-                {isRecoverySession
+                {isPasswordRecovery
                   ? 'Enter and confirm your new password.'
                   : 'We will email you a secure link to reset your password.'}
               </Text>
@@ -130,13 +106,15 @@ export default function ForgotPasswordScreen() {
 
             {/* Recovery form */}
             <Stack gap="md">
-              {!isRecoverySession ? (
+              {!isPasswordRecovery ? (
                 <>
                   <InputField
                     label="Email"
                     value={email}
                     onChangeText={setEmail}
                     placeholder="you@example.com"
+                    returnKeyType="done"
+                    onSubmitEditing={handleSendResetLink}
                     error={error || undefined}
                     testID="email-input"
                   />
@@ -158,6 +136,9 @@ export default function ForgotPasswordScreen() {
                     onChangeText={setPassword}
                     placeholder="Enter your new password"
                     secureTextEntry
+                    inputRef={passwordInput}
+                    returnKeyType="next"
+                    onSubmitEditing={() => confirmPasswordInput.current?.focus()}
                     error={error || undefined}
                     testID="new-password-input"
                   />
@@ -167,6 +148,9 @@ export default function ForgotPasswordScreen() {
                     onChangeText={setConfirmPassword}
                     placeholder="Enter your new password again"
                     secureTextEntry
+                    inputRef={confirmPasswordInput}
+                    returnKeyType="done"
+                    onSubmitEditing={handleUpdatePassword}
                     testID="confirm-new-password-input"
                   />
                   <StyledButton
