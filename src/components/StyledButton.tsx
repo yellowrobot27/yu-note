@@ -1,12 +1,13 @@
 import { Pressable, StyleSheet } from 'react-native';
 import { Spinner } from './primitives/Spinner';
 import { Text } from './primitives/Text';
-import { colors, spacing } from '../theme';
+import { colors, spacing } from '@/theme';
 
 interface StyledButtonProps {
   label: string;
   onPress: () => void;
   variant?: 'primary' | 'secondary';
+  fullWidth?: boolean;
   isLoading?: boolean;
   testID?: string;
 }
@@ -15,6 +16,7 @@ export function StyledButton({
   label,
   onPress,
   variant = 'primary',
+  fullWidth = true,
   isLoading = false,
   testID,
 }: StyledButtonProps) {
@@ -26,6 +28,7 @@ export function StyledButton({
       style={({ pressed }) => [
         styles.base,
         styles[variant],
+        fullWidth && styles.fullWidth,
         pressed && !isLoading && styles.pressed,
         isLoading && styles.disabled,
       ]}
@@ -50,11 +53,13 @@ export function StyledButton({
 const styles = StyleSheet.create({
   base: {
     minHeight: 52,
-    width: '100%',
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
+  },
+  fullWidth: {
+    width: '100%',
   },
   primary: {
     backgroundColor: colors.primary,
