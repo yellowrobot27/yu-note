@@ -128,9 +128,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.primary,
     elevation: 6,
-    shadowColor: '#000000',
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
+    boxShadow: '0px 3px 6px rgba(0, 0, 0, 0.2)',
   },
 });
+
