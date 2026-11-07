@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'yunote-';
-const CACHE_NAME = 'yunote-v2';
+const CACHE_NAME = 'yunote-v3';
 const APP_SHELL = '/';
 
 const PRECACHE_ASSETS = [
