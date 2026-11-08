@@ -7,7 +7,7 @@ import { Screen, Stack, Row, Text, EmptyState, Card, Icon } from '@/components/p
 import { StyledButton } from '@/components/StyledButton';
 import { colors, spacing } from '@/theme';
 import { AppLogo } from '@/components/AppLogo';
-import { getNotes } from '@/services/noteService';
+import { deleteNote, getNotes } from '@/services/noteService';
 import type { Note } from '@/types';
 
 export default function HomeScreen() {
@@ -16,6 +16,9 @@ export default function HomeScreen() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
+  const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState('');
 
   const loadNotes = useCallback(async () => {
     setIsLoading(true);
@@ -29,6 +32,21 @@ export default function HomeScreen() {
     }
   }, []);
 
+  const handleDeleteNote = async (id: string) => {
+    if (deletingNoteId) return;
+    setDeletingNoteId(id);
+    setDeleteError('');
+    try {
+      await deleteNote(id);
+      setNotes((currentNotes) => currentNotes.filter((note) => note.id !== id));
+      setNoteToDelete(null);
+    } catch (caughtError) {
+      setDeleteError(caughtError instanceof Error ? caughtError.message : 'Could not delete this note.');
+    } finally {
+      setDeletingNoteId(null);
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
       void loadNotes();
@@ -37,13 +55,11 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.root}>
-      <Screen
-        padding="lg"
-        backgroundColor={colors.background}
-      >
+      <Screen padding="lg" backgroundColor={colors.background}>
         <Stack gap="lg">
           <Row justify="space-between">
             <AppLogo size={64} />
+            <Text size="xxl" weight="bold" color={colors.text}>YuNote</Text>
             <StyledButton
               label="Log out"
               variant="primary"
@@ -78,14 +94,59 @@ export default function HomeScreen() {
             ) : (
               <Stack gap="md">
                 {notes.map((note) => (
-                  <Card key={note.id}>
+                  <Card key={note.id} testID="note-card">
                     <Stack gap="sm" padding="md">
-                      <Text size="lg" weight="bold" color={colors.text} numberOfLines={1}>
-                        {note.title || 'Untitled note'}
-                      </Text>
+                      <Row justify="space-between" gap="sm">
+                        <Text size="lg" weight="bold" color={colors.text} numberOfLines={1}>
+                          {note.title || 'Untitled note'}
+                        </Text>
+                        <Pressable
+                          onPress={() => {
+                            setNoteToDelete(note.id);
+                            setDeleteError('');
+                          }}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Delete ${note.title || 'Untitled note'}`}
+                          testID="delete-note-button"
+                          hitSlop={8}
+                          style={styles.deleteButton}
+                        >
+                          <Icon name="trash-outline" size={20} color={colors.error} />
+                        </Pressable>
+                      </Row>
                       <Text color={colors.textSecondary} numberOfLines={3}>
                         {note.content || 'No content'}
                       </Text>
+
+                      {noteToDelete === note.id ? (
+                        <Stack gap="sm">
+                          <Text size="sm" color={colors.text}>Delete this note?</Text>
+                          {deleteError ? <Text size="sm" color={colors.error}>{deleteError}</Text> : null}
+                          <Row justify="flex-end" gap="md">
+                            <Pressable
+                              onPress={() => {
+                                setNoteToDelete(null);
+                                setDeleteError('');
+                              }}
+                              disabled={deletingNoteId === note.id}
+                              accessibilityRole="button"
+                              testID="cancel-delete-note-button"
+                            >
+                              <Text color={colors.textSecondary}>Cancel</Text>
+                            </Pressable>
+                            <Pressable
+                              onPress={() => void handleDeleteNote(note.id)}
+                              disabled={deletingNoteId === note.id}
+                              accessibilityRole="button"
+                              testID="confirm-delete-note-button"
+                            >
+                              <Text weight="bold" color={colors.error}>
+                                {deletingNoteId === note.id ? 'Deleting…' : 'Delete'}
+                              </Text>
+                            </Pressable>
+                          </Row>
+                        </Stack>
+                      ) : null}
                     </Stack>
                   </Card>
                 ))}
@@ -117,6 +178,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     paddingVertical: 32,
+  },
+  deleteButton: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   fab: {
     position: 'absolute',

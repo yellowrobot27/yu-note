@@ -44,3 +44,16 @@ export async function createNote(title: string, content: string): Promise<Note> 
   if (error) throw new Error(error.message);
   return mapNote(data);
 }
+
+export async function deleteNote(id: string): Promise<void> {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('You must be logged in to delete a note.');
+
+  const { error } = await supabase
+    .from('notes')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user.id);
+
+  if (error) throw new Error(error.message);
+}
