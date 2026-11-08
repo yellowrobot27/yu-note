@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useAuthStore } from '@/state/useAuthStore';
 import { colors } from '@/theme'
+import { InstallPrompt } from '@/components/InstallPrompt'
 
 export default function RootLayout() {
 	const initializeSession = useAuthStore((state) => state.initializeSession);
@@ -36,7 +37,9 @@ export default function RootLayout() {
 		<SafeAreaProvider>
 		<StatusBar style="dark" />
 		<Slot />
+        <InstallPrompt />
 		</SafeAreaProvider>
 	</>
 	);
 }
+

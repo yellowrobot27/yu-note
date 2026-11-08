@@ -48,7 +48,7 @@ export default function RegisterScreen() {
         router.replace('/');
       } else {
         setConfirmationMessage(
-          'Check your email for a confirmation link. You can log in after confirming your address.'
+          'Check your email for a confirmation link. You can log in after confirming your address. CHECK SPAM!'
         );
       }
     } catch (error) {
@@ -165,3 +165,4 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
 });
+

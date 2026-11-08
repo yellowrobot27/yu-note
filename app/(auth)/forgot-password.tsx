@@ -42,7 +42,7 @@ export default function ForgotPasswordScreen() {
 
     try {
       await requestPasswordReset(email.trim());
-      setMessage('If an account exists for this email, a password reset link has been sent.');
+      setMessage('If an account exists for this email, a password reset link has been sent. CHECK SPAM!');
     } catch (caughtError) {
       setError(
         caughtError instanceof Error
@@ -190,3 +190,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
 });
+
+
